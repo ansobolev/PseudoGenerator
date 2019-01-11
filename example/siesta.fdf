@@ -1,0 +1,67 @@
+# -----------------------------------------------------------------------------
+# FDF for fcc Aluminum
+# Taken from siesta exaples and adapted to suit our needs
+# -----------------------------------------------------------------------------
+
+SystemName       {title}       # Descriptive name of the system
+SystemLabel      {element}     # Short name for naming files
+
+# Species and atoms
+
+NumberOfSpecies        1
+NumberOfAtoms          4
+
+%block ChemicalSpeciesLabel
+  1  13  Al
+%endblock ChemicalSpeciesLabel
+
+LatticeConstant       {alat:7.4} Ang
+
+%block LatticeVectors          
+ 1.00000   0.000000  0.000000
+ 0.00000   1.000000  0.000000 
+ 0.00000   0.000000  1.000000
+%endblock LatticeVectors
+
+KgridCutoff          25. Ang
+
+%block kgrid_Monkhorst_Pack
+18 0  0  0.0
+0  18 0  0.0
+0  0  18 0.0
+%endblock kgrid_Monkhorst_Pack
+
+xc.functional         {xc_f}        # Exchange-correlation functional
+xc.authors            {xc}          # Exchange-correlation version
+
+SpinPolarized         false         # Logical parameters are: yes or no
+
+MeshCutoff           400. Ry        # Mesh cutoff. real space mesh 
+
+# SCF options
+MaxSCFIterations      200           # Maximum number of SCF iter
+DM.MixingWeight       0.1           # New DM amount for next SCF cycle
+DM.Tolerance          1.d-3         # Tolerance in maximum difference
+                                    # between input and output DM
+DM.UseSaveDM          true          # to use continuation files
+DM.NumberPulay        3
+
+SolutionMethod         diagon        # OrderN or Diagon
+ElectronicTemperature  25 meV       # Temp. for Fermi smearing
+
+MD.TypeOfRun           cg           # Type of dynamics:
+MD.NumCGsteps          0            # Number of CG steps for 
+                                    #   coordinate optimization
+MD.MaxCGDispl          0.1 Ang      # Maximum atomic displacement 
+                                    #   in one CG step (Bohr)
+MD.MaxForceTol         0.04 eV/Ang  # Tolerance in the maximum 
+                                    #   atomic force (Ry/Bohr)
+
+# Atomic coordinates
+AtomicCoordinatesFormat     ScaledCartesian    
+%block AtomicCoordinatesAndAtomicSpecies
+  0.000000000000    0.000000000000    0.000000000000  1 
+  0.500000000000    0.500000000000    0.000000000000  1 
+  0.500000000000    0.000000000000    0.500000000000  1 
+  0.000000000000    0.500000000000    0.500000000000  1 
+%endblock AtomicCoordinatesAndAtomicSpecies
