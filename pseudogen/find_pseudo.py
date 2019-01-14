@@ -26,13 +26,11 @@ Delta factor                =    {delta:6.4}  {delta_rel:6.4} meV/atom
 
 def find_pseudo(settings):
     cwd = os.getcwd()
-    print cwd
     fdf_file = read_fdf_file()
     log = {}
     element = settings.calc["element"]
     # get uuid
     calc_uuid = uuid.uuid4().hex[:8]
-    # calc_uuid = "4ce268f7"
     # logging
     log["uuid"] = calc_uuid
     # get reference data
@@ -54,7 +52,7 @@ def find_pseudo(settings):
     for alat in alats:
         prepare_siesta_calc(fdf_file, pseudo_file, alat, settings.siesta_calc)
         run_siesta_calc(alat, settings.siesta_calc)
-        e = read_energy(alat)
+        e = read_energy(element, alat)
         if e is not None:
             x.append(float(e[0]))
             y.append(e[1])

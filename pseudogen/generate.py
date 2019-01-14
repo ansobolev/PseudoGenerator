@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import numpy as np
 from scipy.optimize import minimize
-from settings import *
 
 orbitals = [(1, 0),(2, 0),(2, 1),
             (3, 0),(3, 1),(4, 0),
@@ -20,6 +19,8 @@ orbitals = [(1, 0),(2, 0),(2, 1),
             (7, 0),(5, 3),(6, 2),
             ]
 
+ATOM_PROGRAM = os.environ.get('ATOM_PROGRAM', '/home/andrey/bin/atm')
+ATOM_UTILS_DIR = os.environ.get('ATOM_UTILS_DIR', '/home/andrey/bin/ppt')
 
 class InputFile(object):
 
@@ -136,7 +137,6 @@ class PGInputFile(InputFile):
                            "         0\n"
                            "{n_core:5}    4\n"
                           )
-        
         self.calc_type = "pe" if core else "pg"
         self.title = kwds.get("title", element + " pseudopotential generation")
         self.ps_flavor = kwds.get("ps_flavor", "tm2")
@@ -284,11 +284,11 @@ class PTInputFile(InputFile):
         # cross-excitations
         nconfs = len(self._configurations)
         self.xx = np.zeros((2, nconfs, nconfs))
-        ps_flag = False
+        ps_flag = 0
         head_flag = False
-        for line in out_lines[2:]:
+        for line in out_lines[1:]:
             if 'total' in line:
-                ps_flag = True
+                ps_flag = 1
                 head_flag = True
                 continue
             if head_flag:
