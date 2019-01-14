@@ -1,4 +1,4 @@
-# PseudoGenerator
+# Siesta Pseudopotential Generator
 
 The generator of ''good'' pseudopotentials for SIESTA code. To make it work, several things have to be taken care of:
 
@@ -13,6 +13,21 @@ Also, several environmental variables have to be defined in the system:
  * `ATOM_UTILS_DIR`, which defines the location of the `pt.sh`, `pg.sh` and `ae.sh` scripts;
  * `SIESTA_EXEC`, which defines the location of `SIESTA` executable.
 
-Look at the `examples` folder to make an overview of the usage.
+## Installation
+
+First, clone the code from GitHub:
+
+```
+git clone https://github.com/ansobolev/PseudoGenerator.git
+```
+
+Then, install the package with `pip`:
+```
+pip install -e ./PseudoGenerator
+```
+
+## Usage 
+
+Look at the `examples` folder for an overview of the usage.
 
 [DeltaCodesDFT]: <http://molmod.ugent.be/deltacodesdft>
