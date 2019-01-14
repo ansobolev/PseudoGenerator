@@ -125,4 +125,4 @@ def calcDelta(data_f, data_w, useasymm):
         Delta1 = 1000. * np.sqrt((Ff - Fi) / (Vf - Vi)) \
                  / (v0w + v0f) / (b0w + b0f) * 4. * vref * bref
 
-    return Delta, Deltarel, Delta1
+    return Delta[0], Deltarel[0], Delta1[0]
