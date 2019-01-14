@@ -62,3 +62,6 @@ target/
 
 # Project specific
 delta/
+example/pseudogen
+example/settings.py
+example/Al
