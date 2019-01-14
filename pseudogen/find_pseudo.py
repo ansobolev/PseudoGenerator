@@ -45,8 +45,8 @@ def find_pseudo(settings):
     log["radii"] = settings.radii
     pseudo_file, log["err_pseudo"] = generate_pseudo(settings.calc, settings.electrons, settings.radii)
     log["err_mean"], log["err_max"] = test_pseudo(settings.calc, settings.configs)
-    volumes = np.linspace(0.98, 1.02, 3)
-    # possible alats (3 points near Wien2K equilibrium)
+    volumes = np.linspace(0.98, 1.02, 5)
+    # possible alats (5 points near Wien2K equilibrium)
     alats = (volumes * settings.equil_volume * settings.nat) ** (1./3.)    
     x, y = [], []
     for alat in alats:
@@ -67,6 +67,7 @@ def find_pseudo(settings):
     y_p = np.polyval(p, x_p)
     vol, bulk_mod, bulk_deriv, _ = BM(np.vstack((x_p, y_p)).T)
     our_data = np.core.records.fromrecords([(element, vol, bulk_mod, bulk_deriv), ], names=('element', 'V0', 'B0', 'BP'))
+    print our_data
     delta, delta_rel, delta1 = calcDelta(our_data, ref_data_el, useasymm=False)
     log["delta"] = delta
     log["delta_rel"] = delta_rel

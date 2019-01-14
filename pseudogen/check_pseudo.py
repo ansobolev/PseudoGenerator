@@ -15,8 +15,8 @@ from generate import PGInputFile, PTInputFile
 from siesta import read_fdf_file, prepare_siesta_calc, run_siesta_calc
 from get_energies import read_energy
 from find_pseudo import siesta_calc
-from delta.eosfit import BM
-from delta.calcDelta import read_ref_data, calcDelta_one
+from calc_delta import BM, read_ref_data, calcDelta_one
+
 
 if __name__ == "__main__":
     # fdf file
