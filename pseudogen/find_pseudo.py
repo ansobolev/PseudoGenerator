@@ -18,11 +18,22 @@ Pseudo error (ground state) = {err_pseudo:.4} Ry
                                   max      mean
 Pseudo error (test configs) =    {err_max:6.4}  {err_mean:6.4} Ry
 Equilibrium volume per atom =    {min_p:6.6} A^3
-                                  delta  rel_delta
-Delta factor                =    {delta:6.4}  {delta_rel:6.4} meV/atom
+                                  delta, meV/atom  rel_delta, %
+Delta factor                =    {delta:6.4}       {delta_rel:6.4}
              """
     with open(element + "/log.dat", "a") as f:
         f.write(entry.format(**log))
+
+
+def get_volumes(n_vol, calc, alat=None):
+    abc = np.array(calc["vectors"])
+    vol = np.linalg.det(abc) * (calc["alat"] ** 3)
+    k = (n_vol - 1) / 2
+    return np.linspace(1-0.02*k, 1+0.02*k, n_vol) * vol
+
+def get_alats(volumes, calc):
+    vol_abc = np.linalg.det(np.array(calc["vectors"]))
+    return (volumes / vol_abc) ** (1./3)
 
 def find_pseudo(settings):
     cwd = os.getcwd()
@@ -45,9 +56,10 @@ def find_pseudo(settings):
     log["radii"] = settings.radii
     pseudo_file, log["err_pseudo"] = generate_pseudo(settings.calc, settings.electrons, settings.radii)
     log["err_mean"], log["err_max"] = test_pseudo(settings.calc, settings.configs)
-    volumes = np.linspace(0.98, 1.02, 5)
-    # possible alats (5 points near Wien2K equilibrium)
-    alats = (volumes * settings.equil_volume * settings.nat) ** (1./3.)    
+    
+    # possible alats (several points near Wien2K equilibrium)
+    volumes = get_volumes(settings.volumes, settings.calc)
+    alats = get_alats(volumes, settings.calc)
     x, y = [], []
     for alat in alats:
         prepare_siesta_calc(fdf_file, pseudo_file, alat, settings.siesta_calc)
@@ -58,8 +70,8 @@ def find_pseudo(settings):
             y.append(e[1])
     os.chdir(cwd)
     # making x and y arrays
-    x = (np.array(x) ** 3) / settings.nat
-    y = np.array(y)
+    x = np.array(x) / settings.calc["nat"]
+    y = np.array(y) / settings.calc["nat"]
     p = np.polyfit(x, y, 2)
     min_p = -p[1] / (2*p[0])
     log["min_p"] = min_p

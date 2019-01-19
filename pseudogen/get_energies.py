@@ -25,14 +25,14 @@ def read_energy(element, alat):
             lines = f.readlines()
         final = False
         for line in lines:
+            if "Cell volume" in line:
+                vol = float(line.split()[-1])
             if "Final energy" in line:
                 final = True
             if final and "Total" in line:
                 energy = float(line.split()[3])
                 final = False
-                x = float(path.split("/")[-1])
-                y = energy
-                return np.array((x, y))
+                return np.array((vol, energy))
     return None
 
 

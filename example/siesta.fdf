@@ -18,9 +18,7 @@ NumberOfAtoms          4
 LatticeConstant       {alat:7.4} Ang
 
 %block LatticeVectors          
- 1.00000   0.000000  0.000000
- 0.00000   1.000000  0.000000 
- 0.00000   0.000000  1.000000
+  {vectors}
 %endblock LatticeVectors
 
 KgridCutoff          25. Ang
@@ -28,7 +26,7 @@ KgridCutoff          25. Ang
 %block kgrid_Monkhorst_Pack
 9 0 0  0.0
 0 9 0  0.0
-0 0 9 0.0
+0 0 9  0.0
 %endblock kgrid_Monkhorst_Pack
 
 xc.functional         {xc_f}        # Exchange-correlation functional
