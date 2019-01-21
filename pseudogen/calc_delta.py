@@ -126,3 +126,13 @@ def calcDelta(data_f, data_w, useasymm):
                  / (v0w + v0f) / (b0w + b0f) * 4. * vref * bref
 
     return Delta[0], Deltarel[0], Delta1[0]
+
+
+def calculate_delta(settings, psf_file):
+    """Calculate delta-factor for the known psf file
+    
+    Arguments:
+        settings {module} -- settings.py file
+        psf_file {str} -- psf file name
+    """
+    
