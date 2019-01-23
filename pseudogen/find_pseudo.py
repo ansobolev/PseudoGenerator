@@ -5,8 +5,7 @@ import uuid
 import numpy as np
 import matplotlib.pyplot as plt
 from generate import generate_pseudo, test_pseudo
-from siesta import read_fdf_file, prepare_siesta_calc, run_siesta_calc
-from get_energies import read_energy
+from siesta import SiestaCalculation
 from calc_delta import BM, read_ref_data, calcDelta
 
 
@@ -37,9 +36,9 @@ def get_alats(volumes, calc):
 
 def find_pseudo(settings):
     cwd = os.getcwd()
-    fdf_file = read_fdf_file()
     log = {}
     element = settings.calc["element"]
+    fdf_file = os.path.join(cwd, "siesta.fdf")
     # get uuid
     calc_uuid = uuid.uuid4().hex[:8]
     # logging
@@ -61,10 +60,11 @@ def find_pseudo(settings):
     volumes = get_volumes(settings.volumes, settings.calc)
     alats = get_alats(volumes, settings.calc)
     x, y = [], []
+    siesta_calc = SiestaCalculation(settings, pseudo_file, fdf_file=fdf_file)
     for alat in alats:
-        prepare_siesta_calc(fdf_file, pseudo_file, alat, settings.siesta_calc)
-        run_siesta_calc(alat, settings.siesta_calc)
-        e = read_energy(element, alat)
+        siesta_calc.prepare(alat)
+        siesta_calc.run()
+        e = siesta_calc.results()
         if e is not None:
             x.append(float(e[0]))
             y.append(e[1])

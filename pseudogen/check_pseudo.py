@@ -11,7 +11,6 @@ import numpy as np
 import shutil
 import matplotlib.pyplot as plt
 from generate import PGInputFile, PTInputFile
-from siesta import read_fdf_file, prepare_siesta_calc, run_siesta_calc
 from get_energies import read_energy
 from calc_delta import BM, read_ref_data, calcDelta
 from find_pseudo import get_alats, get_volumes

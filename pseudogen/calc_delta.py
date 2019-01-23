@@ -5,6 +5,7 @@
  Molecular Modeling (CMM), Ghent University, Ghent, Belgium
 """
 
+import os
 import numpy as np
 
 def read_ref_data(file_name):
@@ -128,11 +129,42 @@ def calcDelta(data_f, data_w, useasymm):
     return Delta[0], Deltarel[0], Delta1[0]
 
 
-def calculate_delta(settings, psf_file):
-    """Calculate delta-factor for the known psf file
+class DeltaCalculation(object):
     
-    Arguments:
-        settings {module} -- settings.py file
-        psf_file {str} -- psf file name
-    """
+    def __init__(self, settings, uuid):
+        """ A class for delta factor calculation
+        """
+        self._cwd = os.getcwd()
+        self.settings = settings
+        self.element = settings.calc["element"]
+        self._log = {}
+        self._calc_dir = os.path.join(self.element, uuid)
+        if not os.path.exists(self._calc_dir):
+            os.makedirs(self._calc_dir)
+        self._switch_dir()
+        self.radii = None
+
+    def _switch_dir(self):
+        if os.getcwd() == self._cwd:
+            os.chdir(self._calc_dir)
+        elif os.getcwd() == self._calc_dir:
+            os.chdir(self._cwd)
+        else:
+            print "DeltaCalculation._switch_dir: found myself in a strange directory: {}".format(os.getcwd())
+
+    def run_calc(self):
+        pass
+
+    def calculate(self, log=True):
+        if hasattr(self.settings, 'reference_file'):
+            ref_file_name = self.settings.reference_file
+        else:
+            ref_file_name = "delta/WIEN2k.txt"
+
+        ref_data = read_ref_data(ref_file_name)
+        ref_data_el = ref_data[ref_data['element'] == self.element]
+
+    def log(self):
+        self._switch_dir()
+
     

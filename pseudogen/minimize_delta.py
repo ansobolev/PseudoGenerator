@@ -10,7 +10,7 @@ import numpy as np
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from generate import generate_pseudo, test_pseudo
-from siesta import read_fdf_file, prepare_siesta_calc, run_siesta_calc
+from siesta import SiestaCalculation
 from get_energies import read_energy
 from calc_delta import BM, read_ref_data, calcDelta
 
@@ -31,7 +31,7 @@ Delta factor                =    {delta:6.4}  {delta_rel:6.4} meV/atom
 
 def minimize_delta(settings, x0, const_radii):
     cwd = os.getcwd()
-    fdf_file = read_fdf_file()
+    fdf_file = os.path.join(cwd, "siesta.fdf")
     element = settings.calc["element"]
     # get reference data
     ref_data = read_ref_data("delta/WIEN2k.txt")
@@ -57,17 +57,18 @@ def minimize_delta(settings, x0, const_radii):
         volumes = np.linspace(0.98, 1.02, 3)
         alats = (volumes * settings.equil_volume * settings.nat) ** (1./3.)
         x, y = [], []
+        siesta_calc = SiestaCalculation(settings, pseudo_file, fdf_file=fdf_file)
         for alat in alats:
-            prepare_siesta_calc(fdf_file, pseudo_file, alat, settings.siesta_calc)
-            run_siesta_calc(alat, settings.siesta_calc)
-            e = read_energy(element, alat)
+            siesta_calc.prepare(alat)
+            siesta_calc.run()
+            e = siesta_calc.results()
             if e is not None:
                 x.append(float(e[0]))
                 y.append(e[1])
         os.chdir(cwd)
         # making x and y arrays
-        x = (np.array(x) ** 3) / settings.nat
-        y = np.array(y)
+        x = np.array(x) / settings.nat
+        y = np.array(y) / settings.nat
         p = np.polyfit(x, y, 2)
         min_p = -p[1] / (2*p[0])
         log["min_p"] = min_p
