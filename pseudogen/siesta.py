@@ -34,6 +34,7 @@ class SiestaCalculation(object):
 
     def __init__(self, settings, pseudo_file, fdf_file="siesta.fdf"):
         self.calc = settings.calc
+        self.is_run = False
         self.siesta_calc = settings.siesta_calc
         self.element = self.calc["element"]
         
@@ -49,25 +50,38 @@ class SiestaCalculation(object):
         path = "%.4f" % (alat,)
         if not os.path.isdir(path):
             os.makedirs(path)
+            self.is_run = False
+        elif self.check():
+            self.is_run = True
+            return
         fdf_file_name = os.path.join(path, self.element + ".fdf")
         # copy and rename psf file
         shutil.copy(self.pseudo_file, path)
-        os.rename(os.path.join(path, self.pseudo_file), os.path.join(path, self.element + ".psf"))
+        os.rename(os.path.join(path, os.path.basename(self.pseudo_file)), os.path.join(path, self.element + ".psf"))
         write_fdf_file(fdf_file_name, self.fdf_file, self.siesta_calc)
 
     def run(self):
         path = "%.4f" % (self.siesta_calc["alat"],)
         cwd = os.getcwd()
         os.system('cd ' + path + '; mpirun -np 4 ' + SIESTA_EXEC + ' < ' + self.element + ".fdf" + ' | tee ' + self.element + '.out')
+        if self.check():
+            self.is_run = True
         os.chdir(cwd)
 
-    def results(self):
+    def check(self):
         out_file = self.element + '.out'
         # get files in path
         path = "%.4f" % (self.siesta_calc["alat"],)
         files = os.listdir(path)
         # check if the calc succeeded 
         if out_file in files:
+            return True
+        return False
+
+    def results(self):
+        out_file = self.element + '.out'
+        path = "%.4f" % (self.siesta_calc["alat"],)
+        if self.check():
             with open(os.path.join(path, out_file), "r") as f:
                 lines = f.readlines()
             final = False

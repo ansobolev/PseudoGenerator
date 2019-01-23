@@ -7,6 +7,7 @@
 
 import os
 import numpy as np
+from siesta import SiestaCalculation
 
 def read_ref_data(file_name):
     """ Read reference data on V0, B0 and B1 from file
@@ -128,21 +129,36 @@ def calcDelta(data_f, data_w, useasymm):
 
     return Delta[0], Deltarel[0], Delta1[0]
 
+def get_volumes(n_vol, calc, alat=None):
+    abc = np.array(calc["vectors"])
+    vol = np.linalg.det(abc) * (calc["alat"] ** 3)
+    k = (n_vol - 1) / 2
+    return np.linspace(1-0.02*k, 1+0.02*k, n_vol) * vol
+
+def get_alats(volumes, calc):
+    vol_abc = np.linalg.det(np.array(calc["vectors"]))
+    return (volumes / vol_abc) ** (1./3)
+
 
 class DeltaCalculation(object):
     
-    def __init__(self, settings, uuid):
+    def __init__(self, settings, uuid, logger=None):
         """ A class for delta factor calculation
         """
+        if logger is not None:
+            self._log = True
+            self._logger = logger
         self._cwd = os.getcwd()
         self.settings = settings
         self.element = settings.calc["element"]
-        self._log = {}
+        self.pseudo_file = None
+        if self._log:
+            self._logger.info("Uuid: {}".format(uuid))
         self._calc_dir = os.path.join(self.element, uuid)
         if not os.path.exists(self._calc_dir):
             os.makedirs(self._calc_dir)
         self._switch_dir()
-        self.radii = None
+
 
     def _switch_dir(self):
         if os.getcwd() == self._cwd:
@@ -152,10 +168,29 @@ class DeltaCalculation(object):
         else:
             print "DeltaCalculation._switch_dir: found myself in a strange directory: {}".format(os.getcwd())
 
-    def run_calc(self):
-        pass
+    def add_pseudo(self, pseudo_file):
+        self.pseudo_file = pseudo_file
 
-    def calculate(self, log=True):
+    def run_calcs(self, fdf_file):
+        volumes = get_volumes(self.settings.volumes, self.settings.calc)
+        alats = get_alats(volumes, self.settings.calc)
+        x, y = [], []
+        siesta_calc = SiestaCalculation(self.settings, self.pseudo_file, fdf_file=fdf_file)
+        for alat in alats:
+            siesta_calc.prepare(alat)
+            if not siesta_calc.is_run:
+                siesta_calc.run()
+            e = siesta_calc.results()
+            if e is not None:
+                x.append(float(e[0]))
+                y.append(e[1])
+        self.volumes = np.array(x) / self.settings.calc["nat"]
+        self.energies = np.array(y) / self.settings.calc["nat"]
+        if self._log:
+            self._logger.debug("Volumes per atom: {}".format(self.volumes))
+            self._logger.debug("Energies per atom: {}".format(self.energies))
+
+    def get_delta(self):
         if hasattr(self.settings, 'reference_file'):
             ref_file_name = self.settings.reference_file
         else:
@@ -164,7 +199,25 @@ class DeltaCalculation(object):
         ref_data = read_ref_data(ref_file_name)
         ref_data_el = ref_data[ref_data['element'] == self.element]
 
-    def log(self):
-        self._switch_dir()
-
+        if len(self.volumes) == 7:
+            x_p = self.volumes
+            y_p = self.energies
+        else:
+            p = np.polyfit(self.volumes, self.energies, 2)
+            min_p = -p[1] / (2*p[0])
+            x_p = np.linspace(0.94*min_p, 1.06*min_p, 7)
+            y_p = np.polyval(p, x_p)
+        vol, bulk_mod, bulk_deriv, _ = BM(np.vstack((x_p, y_p)).T)
+        if self._log:
+            self._logger.debug("Equil. vol\tBulk modulus\tBulk mod. deriv")
+            self._logger.debug("{}\t{}\t{}".format(vol, bulk_mod, bulk_deriv))
+        our_data = np.core.records.fromrecords([(self.element, vol, bulk_mod, bulk_deriv), ], names=('element', 'V0', 'B0', 'BP'))
+        delta, rel_delta, _ = calcDelta(our_data, ref_data_el, useasymm=False)
+        self.delta = delta
+        self.rel_delta = rel_delta 
+        if self._log:
+            self._logger.info("Equilibrium volume per atom =    {min_p:6.6} A^3".format(min_p=vol))
+            self._logger.info("""
+                                delta, meV/atom  rel_delta, % 
+Delta factor                =    {delta:6.4}       {rel_delta:6.4}""".format(delta=delta, rel_delta=rel_delta))
     
