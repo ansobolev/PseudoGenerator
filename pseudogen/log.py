@@ -1,23 +1,31 @@
 
 import logging
 
+loggers = {}
+
 def get_logger(name, element):
-    # create logger
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    global loggers
 
-    # create console handler and set level to debug
-    fh = logging.FileHandler(element + '/log.dat')
-    fh.setLevel(logging.DEBUG)
+    if loggers.get(name):
+        return loggers.get(name)
+    else:
+        # create logger
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.DEBUG)
 
-    # create formatter
-    formatter = logging.Formatter('%(asctime)s: %(name)s - %(levelname)s - %(message)s')
+        # create console handler and set level to debug
+        fh = logging.FileHandler(element + '/log.dat')
+        fh.setLevel(logging.DEBUG)
 
-    # add formatter to fh
-    fh.setFormatter(formatter)
+        # create formatter
+        formatter = logging.Formatter('%(asctime)s: %(name)s - %(levelname)s - %(message)s')
 
-    # add fh to logger
-    logger.addHandler(fh)
+        # add formatter to fh
+        fh.setFormatter(formatter)
+
+        # add fh to logger
+        logger.addHandler(fh)
+        loggers[name] = logger
     return logger
 
 def interlog(logger):
