@@ -12,8 +12,7 @@ import shutil
 import matplotlib.pyplot as plt
 from generate import PGInputFile, PTInputFile
 from get_energies import read_energy
-from calc_delta import BM, read_ref_data, calcDelta
-from find_pseudo import get_alats, get_volumes
+from calc_delta import BM, read_ref_data, calcDelta, get_alats, get_volumes
 
 
 def check_pseudo(settings, data_dir):

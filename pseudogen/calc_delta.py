@@ -9,6 +9,8 @@ import os
 import numpy as np
 from siesta import SiestaCalculation
 
+echarge = 1.60217733e-19
+
 def read_ref_data(file_name):
     """ Read reference data on V0, B0 and B1 from file
     
@@ -187,8 +189,8 @@ class DeltaCalculation(object):
         self.volumes = np.array(x) / self.settings.calc["nat"]
         self.energies = np.array(y) / self.settings.calc["nat"]
         if self._log:
-            self._logger.debug("Volumes per atom: {}".format(self.volumes))
-            self._logger.debug("Energies per atom: {}".format(self.energies))
+            data_str = "\n".join([" "*52 + "{0:12.8}          {1:12.8}".format(v, e) for v, e in zip(self.volumes, self.energies)])
+            self._logger.debug("  Volumes, A^3/atom   Energies, eV/atom\n" + data_str)
 
     def get_delta(self):
         if hasattr(self.settings, 'reference_file'):
@@ -208,6 +210,7 @@ class DeltaCalculation(object):
             x_p = np.linspace(0.94*min_p, 1.06*min_p, 7)
             y_p = np.polyval(p, x_p)
         vol, bulk_mod, bulk_deriv, _ = BM(np.vstack((x_p, y_p)).T)
+        bulk_mod *= (echarge * 1.0e21)
         if self._log:
             self._logger.debug("Equil. vol\tBulk modulus\tBulk mod. deriv")
             self._logger.debug("{}\t{}\t{}".format(vol, bulk_mod, bulk_deriv))
@@ -219,5 +222,5 @@ class DeltaCalculation(object):
             self._logger.info("Equilibrium volume per atom =    {min_p:6.6} A^3".format(min_p=vol))
             self._logger.info("""
                                 delta, meV/atom  rel_delta, % 
-Delta factor                =    {delta:6.4}       {rel_delta:6.4}""".format(delta=delta, rel_delta=rel_delta))
+Delta factor                =    {delta:6.4}       {rel_delta:6.4}""".format(delta=self.delta, rel_delta=self.rel_delta))
     
