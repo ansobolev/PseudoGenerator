@@ -26,7 +26,7 @@ def read_fdf_file(file_name):
 
 def write_fdf_file(file_name, file_text, calc):
     # write vectors in a cool way
-    calc["vectors"] = "\n".join(["\t".join([str(v) for v in calc["vectors"]])])
+    calc["vectors"] = "\n".join(["{0[0]}\t{0[1]}\t{0[2]}".format(v) for v in calc["vectors"]])
     with open(file_name, "w") as f:
         f.write(file_text.format(**calc))
 

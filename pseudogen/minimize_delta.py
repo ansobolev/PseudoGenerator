@@ -46,4 +46,5 @@ def minimize_delta(settings, x0, const_radii):
         interlog(logger)
         return delta_calc.delta
 
-    return minimize(fun, x0, args=const_radii, options={"eps":0.1})
+    eps = getattr(settings, 'eps', 0.1)
+    return minimize(fun, x0, args=const_radii, options={"eps":eps})
