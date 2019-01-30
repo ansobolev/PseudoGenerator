@@ -47,4 +47,8 @@ def minimize_delta(settings, x0, const_radii):
         return delta_calc.delta
 
     eps = getattr(settings, 'eps', 0.1)
-    return minimize(fun, x0, args=const_radii, options={"eps":eps})
+    method = getattr(settings, 'method', None)
+    options = getattr(settings, 'min_options', {})
+    options.update({"eps": eps})
+    tolerance = getattr(settings, 'tolerance', 1e-3)
+    return minimize(fun, x0, args=const_radii, method=method, tol=tolerance, options=options)

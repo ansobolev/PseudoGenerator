@@ -40,4 +40,9 @@ configs = [[1.5, 2.5],
            [1.25, 2.75],
            [3,1]]
 
+# Minimization options
+
 eps = 0.05
+method = 'CG'
+tolerance = 1e-2
+min_options = {'disp': True}

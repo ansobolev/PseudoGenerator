@@ -201,14 +201,14 @@ class DeltaCalculation(object):
         ref_data = read_ref_data(ref_file_name)
         ref_data_el = ref_data[ref_data['element'] == self.element]
 
-        if len(self.volumes) == 7:
-            x_p = self.volumes
-            y_p = self.energies
-        else:
-            p = np.polyfit(self.volumes, self.energies, 2)
-            min_p = -p[1] / (2*p[0])
-            x_p = np.linspace(0.94*min_p, 1.06*min_p, 7)
-            y_p = np.polyval(p, x_p)
+#        if len(self.volumes) == 7:
+        x_p = self.volumes
+        y_p = self.energies
+        # else:
+        #     p = np.polyfit(self.volumes, self.energies, 2)
+        #     min_p = -p[1] / (2*p[0])
+        #     x_p = np.linspace(0.94*min_p, 1.06*min_p, 7)
+        #     y_p = np.polyval(p, x_p)
         vol, bulk_mod, bulk_deriv, _ = BM(np.vstack((x_p, y_p)).T)
         bulk_mod *= (echarge * 1.0e21)
         if self._log:
